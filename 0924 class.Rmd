@@ -1,0 +1,93 @@
+---
+title: "0924 Manipulation"
+author: "River Sung"
+date: "24/09/2024"
+output: html_document
+---
+Dataset manipulation
+Loading a practice set - iris flower dataset
+Simple functions 
+```{r}
+data("iris") #loading the dataset "iris"
+iris
+head(iris) #looking at the heading of the table 
+tail(iris) #looking at the bottom of the table
+summary(iris) #give a basic overview of character/numeric data, like mean, min, max, etc. 
+str(iris) #examine the structure of the object (datset) - structure, type, object 
+class(iris) #classification of object - could be data frame, variable
+# $sign in R refer to a specific column 
+fix(iris) #you can fix the dataset, but once the window is closed the temporary changes are gone
+```
+
+Selection 
+```{r}
+students<-read.table('https://www.dipintothereef.com/uploads/3/7/3/5/37359245/students.txt',header=T, sep="\t", dec='.') # read data set from url
+students
+str(students) 
+#height should be numeral but it is shown as int (interger) and chr (character)
+#R did not understand it as a grouping variable, there is some missing information 
+#object name is students 
+head(students)
+students$gender #looking at a specific column 
+students[,1] #extracting (row, column)
+students[1,1]
+try <- students[,1] #making this selection into a vector 
+try
+```
+
+Subset
+```{r}
+students$gender=="female" #== exclusiviely 
+my.filter <- students$gender=="female" #making a filter
+students[my.filter,] -> female
+my.filter2 <- students$gender=="male"
+students[my.filter2,] -> male
+rownames(female) <- c('Vanessa', 'Vicky', 'Michelle', 'Joyce', 'Victoria')
+female
+```
+
+Practice 2.1
+```{r}
+data(iris)
+str(iris)
+iris
+iris$Species=="setosa" -> setosa.f
+iris[setosa.f,] -> setosa
+setosa
+
+iris$Species=="versicolor" -> versicolor.f
+iris[versicolor.f,] -> versicolor
+versicolor
+
+iris$Species=="virginica" -> virginica.f
+iris[virginica.f,] -> virginica
+virginica
+```
+
+Sample
+```{r}
+nrow(female) #show how many
+1:nrow (female) #in swquence 
+```
+
+```{r}
+ind1<-order (iris$Sepal.Width)
+iris [ind1,]
+iris[order(iris$Sepal.Width),] -> iris.width
+
+iris.width
+
+colors <- ifelse(iris$Species=='setosa', 'purple', ifelse(iris$Species=="versicolor", "blue" ,"pink" ) )
+colors
+
+iris.width$colour <- ifelse(iris.width$Species=='setosa', 'purple', ifelse(iris.width$Species=="versicolor", "blue" ,"pink" ) )
+
+iris.width
+
+iris.width$Species=="versicolor" -> delete.colour
+iris.width[delete.colour,] -> new
+new
+
+new$colour<-NULL
+new
+```
