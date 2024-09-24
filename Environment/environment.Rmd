@@ -1,5 +1,5 @@
 ---
-title: "River Sung"
+title: "Practice 1.3 by River Sung"
 ---
 
 ```{r eval = TRUE,  message=F, include=FALSE, warning=F, purl=F, results="hide"}
