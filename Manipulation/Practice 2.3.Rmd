@@ -1,0 +1,42 @@
+---
+title: "Practice 2.3"
+author: "River Sung"
+date: "01/10/2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyr)
+```
+
+
+
+```{r}
+# read the data from the link
+rairuoho <- read.table('https://www.dipintothereef.com/uploads/3/7/3/5/37359245/rairuoho.txt', header = T, sep = "\t") 
+str(rairuoho)
+head(rairuoho)
+
+# using ifelse function to replace "nutrienct" with "enriched"
+rairuoho$treatment <- ifelse(rairuoho$treatment == "nutrient", "enriched", "water")
+rairuoho
+
+# convert to long table
+rairuoho_long <- rairuoho %>%
+  pivot_longer(day3:day8, names_to = "Day", values_to = "Length")
+rairuoho_long
+
+# merge spatial 1 and 2 
+rairuoho_long$position <- paste(rairuoho_long$spatial1, rairuoho_long$spatial2, sep = "_")
+rairuoho_long
+
+# remove unwanted columns
+rairuoho_long$row <- NULL
+rairuoho_long$column <- NULL
+rairuoho_long$spatial1 <- NULL
+rairuoho_long$spatial2 <- NULL
+
+print(rairuoho_long)
+```
+
