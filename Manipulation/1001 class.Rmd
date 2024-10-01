@@ -152,22 +152,3 @@ income_sep
 #split by row
 income_long_var %>% separate_rows(var1, sep = "_")
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
