@@ -1,0 +1,109 @@
+---
+title: "1008 class"
+author: "River Sung"
+date: "08/10/2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Data types and structures
+## Core data types
+Aka "modes"  
+`typeof` - determine the mode of the object  
+`mode` - also determine the mode of the object, but cannot distinguish between **integers** and **doubles**
+
+### Numeric
+**Numeric** data type is the simplest. It contains **integers** or **doubles**  
+**Integers** - whole numbers  
+**Doubles** - decimal numbers 
+```{r}
+x <- c(1.0, -3.4, 2, 140.1) # numeric and double
+
+typeof(x) #using this function to determine what mode/data type x is 
+mode(x) #does not distinguish integers and doubles 
+
+#Removing decimal does not make a double into an integer. 
+#For example: 
+typeof(5)
+```
+Therefore, for R to recognize a value as integer, we add a capital L
+```{r}
+x <- 5L
+typeof(x)
+```
+
+### Character 
+Mostly seen as letters or words. 
+```{r}
+x <- c("bubul", "magpie", "spoonbill", "barbet")
+typeof(x)
+
+# Can also be two numeric vector 
+x <- 3
+y <- 5.3
+x + y
+```
+When " " is used, R interprets them as characters, but some functions like  `plot(x, y)` automatically converts characters to doubles. 
+```{r}
+x <- "3"
+y <- "5.3"
+
+# x+ y
+# Error in x + y : non-numeric argument to binary operator
+plot(x, y)
+```
+
+### Logical 
+`TRUE` or `FALSE` conditions, also `1` or `0`
+```{r}
+# full text:
+x <- c(TRUE, FALSE, FALSE, TRUE)
+# or in short:
+x <- c(T, F, F, T)
+# or binary 
+x1<-c(1,0,0,1)
+x2 <- as.logical(c(1,0,0,1)) #converts internally to T or F
+# OR: x3 <- as.logical(c(1,0,0,1))
+```
+
+## Derived data types 
+Stored as numeric, character, or logical, but have additional attributes allowing to be handled certain way. These attributes define the `class` of an object. 
+### Factor
+Used to group variables into fixed number of unique categories or **levels**. Most time data type must be converted into a factor using `as.factor` 
+```{r}
+a <- c("M", "F", "F", "U", "F", "M", "M", "M", "F", "U")
+typeof(a) # mode character
+class(a) # class character
+
+a.fact <- as.factor(a)
+class(a.fact) # class factor
+```
+**Note**: a has not changed the mode. The data is still of the type `character`. However, it may seem strange at first, but the derived object `a.fact` is now stored as an `integer`!
+```{r}
+mode(a.fact)
+typeof(a.fact)
+a.fact
+```
+
+
+
+
+
+
+
+
+```{r}
+iris
+str(iris)
+
+iris.sel <- subset(iris, Species == "setosa" | Species == "virginica")
+iris.sel
+levels(iris.sel$Species)
+
+iris.sel$Species <- droplevels(iris.sel$Species)
+iris.sel
+
+```
