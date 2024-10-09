@@ -1,0 +1,63 @@
+---
+title: "Practice 3.2"
+author: "River Sung"
+date: "09/10/2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+<p class="alert">
+**`r knitr::asis_output("\U26A0")` Practice 3.2** Create the following data frame from scratch. In this short and not very scientific experiment, the growth conditions of five plant individuals are to be tested. The height of the plants will be measured at the beginning of the experiment and after one week. The `height` is a double; the time of the measurement (`start_experiment` and `end_experiment`) and the individual plants (`plant 1`, `plant 2`,`plant 3`,`plant 4` and `plant 5`) are **character** vectors. Reformat this data frame to obtain the `height` into one single column and the `time` of the measurement as a factor with two levels. You save this **data frame** as the first element of a list named **`my.experiment`**. The second element of this list will be another list called **`growth`**, in which three elements are stored: [1] a **character vector** extracting the row names of the previously created table ; [2] a **numeric vector** (double) indicating the change in height of each plant (can be positive or negative, but will be calculated as a percentage of the initial height); [3] a combination of these two elements in a **table with two columns**: `plants` and `growth`. The third element of the **`my.experiment`** list will be an arbitrary message about the growth status of these plants. You will put both your *.Rmd* and *.html* files in a public repository accessible through your Github account. You will email me [vianneydenis@g.ntu.edu.tw] with the address (URL) of this repository (e.g. https://github.com/vianneydenis/OCEAN5098B.git) **before next Monday** so that I can review your work. The **title of your email** should be: `Practice 3.2 (your name: your student no.). ENJOY ;)
+</p>
+
+## First element 
+```{r}
+Height <- c(4, 5, 3, 6, 7, 9, 6, 5, 4, 7) # stating heights 
+typeof(Height) # doubles 
+
+
+Time <- c('start_experiment', 'end_experiment') # stating time 
+typeof(Time) # characters 
+fac.Time <- as.factor(Time) # changing char to factors 
+class(fac.Time) # now they're factors 
+
+
+Individual <- c('plant 1','plant 2','plant 3','plant 4','plant 5') # stating individuals, though not sure if this part is needed? 
+element1 <- data.frame(Individual, Height, fac.Time) # first element of my final list 
+
+str(element1)
+element1
+```
+
+## Second element 
+```{r}
+# [1]
+plant <- element1$Individual # I think I am supposed to use the extract rownames function, but it will only have #1-10
+typeof(plant) # char
+
+# [2]
+start_experiment <- c(4, 5, 3, 6, 7)
+end_experiment <- c(9, 6, 5, 4, 7)
+growth <- ((end_experiment - start_experiment)/start_experiment)*100 # calculating %growth
+
+# [3]
+combo <- data.frame(plant, growth) # data frame of individuals and their growth
+str(combo)
+
+growth_ele2 <- list(plant, growth, combo) # make these three into a list
+```
+
+## Third element 
+```{r}
+msg <- ("plant 1-3 grew, plant 4 shrunk, plant 5 stayed the same")
+```
+
+## Making the final list 
+```{r}
+my.experiment <- list(element1, growth_ele2, msg)
+str(my.experiment)
+```
+
+### **This took way longer than it's supposed to :/** ###
