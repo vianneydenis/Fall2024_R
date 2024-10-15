@@ -1,0 +1,57 @@
+---
+title: "Practice 4.1"
+author: "River Sung"
+date: "15/10/2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<p class="alert">
+**`r knitr::asis_output("\U26A0")` Practice 4.1** Using the `iris` dataset, reproduce the plot below. **Explore** the function `pairs` allowing to generate a matrix of scatter plots between variables `pairs (iris[1:4])`. You will send me a **pdf** file of the plot your made. You can also add your code into a *.Rmd* in which you will import your image and knit it in a *.html* file. You will email me [vianneydenis@g.ntu.edu.tw] your files (and/or link) **before next Monday** so that I can review your work. The **title of your email** should be: `Practice 4.1 (your name: your student no.). ENJOY ;)
+</p>
+
+
+```{r}
+data(iris)
+
+pch_values <- c(1, 2, 3) # assigning different pch symbols 
+species_pch <- as.numeric(factor(iris$Species))  # matching pch symbols to species
+
+pdf(file = "Practice 4.1.pdf", paper = "A4", width = 8, height = 6)
+
+# Plotting! 
+plot(iris$Petal.Length, iris$Petal.Width, 
+     xlim = c(1, 7),
+     ylim = c(0, 2.5),
+     yaxt = "n", # disable default y-axis
+     main = "Petal width vs. length", 
+     xlab = "Petal length (cm)", 
+     ylab = "Petal width (cm)", 
+     pch = pch_values[species_pch],  
+     col = iris$Species)  
+
+axis(2, at = seq(0.5, 2.5, by = 0.5), 
+     labels = seq(0.5, 2.5, by = 0.5))  # custom y-axis ticks
+
+# linear regression model
+lm_model <- lm(Petal.Width~Petal.Length, data = iris)
+abline(lm_model, col = "black", lwd = 1)
+
+r_squared <- summary(lm_model)$r.squared
+text(5, 0.5, paste("R=", round(r_squared, 2)), col = "black", cex = 1.2) # coordinate as plot location 
+
+# legend
+legend("topleft", 
+       legend = levels(iris$Species), 
+       col = 1:3, 
+       pch = pch_values)
+
+# export plot as pdf 
+dev.off()
+getwd()
+setwd("/Users/riversung/NTU/113-1 Fall 2024/Ocean5098 R/Rclass_Fall2024/Graphics")
+```
+
