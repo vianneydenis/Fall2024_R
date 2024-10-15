@@ -243,6 +243,44 @@ str(my.experiment)</code></pre>
 ##   .. ..$ plant : chr [1:10] &quot;plant 1&quot; &quot;plant 2&quot; &quot;plant 3&quot; &quot;plant 4&quot; ...
 ##   .. ..$ growth: num [1:10] 125 20 66.7 -33.3 0 ...
 ##  $ : chr &quot;plant 1-3 grew, plant 4 shrunk, plant 5 stayed the same&quot;</code></pre>
+<pre class="r"><code>my.experiment</code></pre>
+<pre><code>## [[1]]
+##    Individual Height         fac.Time
+## 1     plant 1      4 start_experiment
+## 2     plant 2      5   end_experiment
+## 3     plant 3      3 start_experiment
+## 4     plant 4      6   end_experiment
+## 5     plant 5      7 start_experiment
+## 6     plant 1      9   end_experiment
+## 7     plant 2      6 start_experiment
+## 8     plant 3      5   end_experiment
+## 9     plant 4      4 start_experiment
+## 10    plant 5      7   end_experiment
+## 
+## [[2]]
+## [[2]][[1]]
+##  [1] &quot;plant 1&quot; &quot;plant 2&quot; &quot;plant 3&quot; &quot;plant 4&quot; &quot;plant 5&quot; &quot;plant 1&quot; &quot;plant 2&quot;
+##  [8] &quot;plant 3&quot; &quot;plant 4&quot; &quot;plant 5&quot;
+## 
+## [[2]][[2]]
+## [1] 125.00000  20.00000  66.66667 -33.33333   0.00000
+## 
+## [[2]][[3]]
+##      plant    growth
+## 1  plant 1 125.00000
+## 2  plant 2  20.00000
+## 3  plant 3  66.66667
+## 4  plant 4 -33.33333
+## 5  plant 5   0.00000
+## 6  plant 1 125.00000
+## 7  plant 2  20.00000
+## 8  plant 3  66.66667
+## 9  plant 4 -33.33333
+## 10 plant 5   0.00000
+## 
+## 
+## [[3]]
+## [1] &quot;plant 1-3 grew, plant 4 shrunk, plant 5 stayed the same&quot;</code></pre>
 <div id="this-took-way-longer-than-its-supposed-to" class="section level3">
 <h3><strong>This took way longer than it’s supposed to :/</strong></h3>
 </div>

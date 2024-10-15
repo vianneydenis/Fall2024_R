@@ -58,6 +58,9 @@ msg <- ("plant 1-3 grew, plant 4 shrunk, plant 5 stayed the same")
 ```{r}
 my.experiment <- list(element1, growth_ele2, msg)
 str(my.experiment)
+my.experiment
+
+barplot(my.experiment$growth_ele2)
 ```
 
 ### **This took way longer than it's supposed to :/** ###
