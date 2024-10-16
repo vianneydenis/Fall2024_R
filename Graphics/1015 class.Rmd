@@ -1,0 +1,29 @@
+---
+title: "1015 Graphics"
+author: "River Sung"
+date: "15/10/2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r cars, warning = F, message=F} 
+# not showing the warning and message in Rmd
+```
+
+
+# `base` package
+## Basic scatter and line charts
+```{r} 
+treatment <- c(0.02,1.8, 17.5, 55,75.7, 80) # numeric
+treatment # double check 
+
+plot(treatment) # simple scattered plot 
+plot(treatment, type = "l") # line
+plot(treatment, type = "p") # point
+plot(treatment, type = "o") # line and point
+```
+
+
