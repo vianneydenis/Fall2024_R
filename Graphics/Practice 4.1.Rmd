@@ -55,3 +55,5 @@ getwd()
 setwd("/Users/riversung/NTU/113-1 Fall 2024/Ocean5098 R/Rclass_Fall2024/Graphics")
 ```
 
+VD: Good work !
+
