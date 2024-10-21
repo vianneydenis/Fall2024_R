@@ -41,7 +41,7 @@ lm_model <- lm(Petal.Width~Petal.Length, data = iris)
 abline(lm_model, col = "black", lwd = 1)
 
 r_squared <- summary(lm_model)$r.squared
-text(5, 0.5, paste("R=", round(r_squared, 2)), col = "black", cex = 1.2) # coordinate as plot location 
+text(5, 0.5, paste("R=", round(sqrt(r_squared), 2)), col = "black", cex = 1.2) # coordinate as plot location. VD: Should be sqrt OR R^2 
 
 # legend
 legend("topleft", 
