@@ -25,7 +25,9 @@ library(leaflet)
 
 ## Static map 
 I would like to make a map of the distribution of an endemic frog species of Taiwan: Moltrecht’s Tree Frog (*Kurixalus idiootocus*)   
-莫氏樹蛙 - 台灣特有種
+莫氏樹蛙 - 台灣特有種  
+![Moltrecht’s Tree Frog (*Kurixalus idiootocus*)](/Users/riversung/NTU/113-1 Fall 2024/Ocean5098 R/Rclass_Fall2024/data/original.jpg){width="50%"} 
+
 ```{r}
 # getting the data
 species_data <- occ_search(scientificName = "Kurixalus idiootocus", limit = 500)
