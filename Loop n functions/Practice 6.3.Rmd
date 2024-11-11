@@ -53,6 +53,6 @@ par(mar = c(4, 4, 2, 1), mfrow = c(3, 1), las = 1) # changed margin size
   grow(0,1)
   text(4,110,"Species 2 alone")
   
-  grow(1,1) # changed both starting populations to 1 so the competition is even (i think?)
+  grow(1,1) # changed both starting populations to 1 so the competition is even (I think?)
   text(6,110,"Both Species competing")
 ```
