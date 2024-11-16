@@ -1,0 +1,116 @@
+---
+title: "Practice 7.4"
+author: "River Sung"
+date: "2024-11-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+**Practice 7.4** Create your own pearson.test function. (e.g. you will not use the above cor.test function but you will code your own function). The function should (at least) be able to test for the correlation between two variables. You will need to check at ?pt (or similar function) in order to extract the p-value. You can “dissect” the code source of the current cor.test function using getAnywhere("cor.test.default"). Using the rairuoho dataset, please use your customized function to test correlation between length at day 3 & day 4 then day 3 & day 8 in each treatment (nutrient and water). Interpret results. This homework must be prepared in .Rmd format, which you will knit as a .html file. You will push your files in a public repository accessible via your Github account.
+
+**Load packages**
+```{r}
+
+```
+
+**Figuring things out??**
+```{r}
+getAnywhere("cor.test.default")
+?cor
+?pt
+```
+Need Pearson correlation coefficient `cor()`, t-stat `n`, df `n-2`, and p-val `pt()`  
+  r <- `cor(x, y)`  
+  df <- `n - 2`  
+  ESTIMATE <- `c(cor = r)`  
+  PARAMETER <- `c(df = df)`  
+  STATISTIC <- `c(t = sqrt(df) * r/sqrt(1 - r^2))`  
+
+**Building function**
+```{r}
+pearson.test <- function(x, y) {
+  # if the lengths of x and y are not equal, then...
+  if(length(x) != length(y)) { 
+    # both variables need to have same number of data points to continue stats
+    stop("Vectors must have the same length") 
+  }
+  
+  r <- cor(x, y) 
+  n <- length(x)
+  # transcribing formula
+  t_stat <- r * sqrt((n - 2) / (1 - r^2)) 
+  df <- n - 2
+  # abs() ensure absolute value, pt() cumulative prob, Two-tailed test
+  p_value <- (1 - pt(abs(t_stat), df)) * 2 
+   
+  # to better display results
+  return(list(correlation = r, 
+              t_statistic = t_stat, 
+              p_value = p_value))
+}
+results <- list()
+```
+
+**Loading data**
+```{r}
+rairuoho <- read.table('https://www.dipintothereef.com/uploads/3/7/3/5/37359245/rairuoho.txt', 
+                       header = T, 
+                       sep = "\t") 
+```
+
+**Comparing data using function**
+```{r}
+unique_treatments <- unique(rairuoho$treatment)
+for (treatment in unique_treatments) {
+  subset_data <- rairuoho[rairuoho$treatment == treatment, ]
+  
+  result_day34 <- pearson.test(subset_data$day3, subset_data$day4)
+  result_day38 <- pearson.test(subset_data$day3, subset_data$day8)
+  
+  results[[treatment]] <- list(
+    day3_day4 = result_day34,
+    day3_day8 = result_day38
+  )
+}
+```
+
+**Display results**
+```{r}
+print(results)
+```
+
+# Organizing & interpreting results
+**Nutrient day3 vs. day4**  
+Correlation = 0.774    
+t = 5.74  
+p = 8.94e-06  
+
+Strong positive correlation, significant!
+
+
+**Nutrient day3 vs. day8**:  
+Correlation = 0.242 
+t = 1.17  
+p = 0.255  
+
+Weak correlation, not significant :(
+
+
+**Water day3 vs. day4**:  
+Correlation = 0.786  
+t = 5.97    
+p = 5.20e-06    
+
+Strong positive correlation, significant!
+
+
+**Water day3 vs. day8**:  
+Correlation = 0.460   
+t = 2.43    
+p = 0.024   
+
+Significant, but not very strong
+
+
