@@ -1,0 +1,11 @@
+install.packages("gvlma")
+install.packages("Hmisc")
+install.packages("corrplot")
+install.packages("lme4")
+
+library(gvlma)
+library(Hmisc)
+library(corrplot)
+library(mvabund)
+library(ggplot2)
+library (lme4)
