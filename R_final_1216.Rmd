@@ -1,0 +1,277 @@
+---
+title: "R Final Report: Coral Spawning"
+author: "Daniel, Annie, & River"
+date: "2024-12-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### Setting Up 
+```{r, warning=FALSE, message=FALSE}
+library(dplyr)
+library(leaflet)
+library(ggplot2)
+library(lubridate)
+library(forcats)
+library(tidyr)
+library(emmeans)
+library(RColorBrewer)
+```
+
+```{r}
+setwd("/Users/riversung/NTU/113-1 Fall 2024/Ocean5098 R/Rclass_Fall2024/Final project")
+raw.data <- read.csv("CSD_Tables.csv")
+```
+  
+##### This report is generated based on the Indo-Pacific coral spawning dataset organized by Baird et al. (2021). Our basic understanding of the dataset and the formation of the research question is inspired by Lin et al. (2021).  
+
+### Introduction
+- Synchronized mass coral spawning is observed once a year worldwide and occurs days following a full moon.
+- The lunar cycle (tide and moonlight) regulates environmental changes that can be detected by corals to coordinate mass spawning. 
+- This dataset includes coral spawning observations in different eco-regions (Figure 1). 
+
+<style>
+.html-widget {
+    margin: auto;
+}
+</style>
+```{r, warning=F, echo=F, message=F, leaflet, fig.align="center", fig.cap="**Figure 1**: World map with all the observed coral spawning sites in 2016."}
+# Figure 1: World map with all the observed coral spawning sites in 2016.
+# This is the world map of observed spawning data in 2016. See Methods section for the rationale. 
+
+# Dot size according to number of data for Figure 3 (using the same data frame). 
+split.data <- raw.data %>% 
+  separate(Date, into = c("day", "month", "year"), sep = "/") %>% 
+  filter(year == 2016) %>%
+  mutate(
+    date.x = as.Date(paste(year, month, day, sep = "-"), "%Y-%m-%d"),
+    site.y = fct_reorder(Site, Latitude, .desc = FALSE)) %>% # Reorder the Figure 1 y-axis according to lat.
+  group_by(date.x, site.y, Country) %>%  
+  summarise(Count = n())
+
+# For mapping, set the plot with lat/long
+split.data2 <- split.data %>%
+  left_join(
+    raw.data %>%
+      dplyr::select(Site, Latitude, Longitude) %>%
+      distinct(), by = c("site.y" = "Site"))
+
+# Colour palette - keep same for Figure 1 & 3
+i.want.set3 <- brewer.pal(length(unique(split.data$Country)), "Set3")
+
+# Mapping 
+color_palette <- colorFactor(palette = "Set3", domain = levels(split.data2$Country))
+leaflet(data = split.data2) %>%
+  addTiles() %>%
+  addCircleMarkers(
+    lng = ~Longitude,
+    lat = ~Latitude,
+    popup = ~site.y,
+    fillOpacity = 1,
+    radius = 6,
+    weight = 0.5,
+    color = "black",
+    fillColor = ~color_palette(Country))
+```
+- The timing of synchronized mass coral spawning depends on whether coral gametes have matured yet. 
+- Gametes maturity varies between coral species and potentially influenced by environmental factors like temperature. 
+- We wonder whether there the coral spawning time is correlated with latitudes, where sites closer to the equator observe spawning earlier in spring/summer. 
+- Zooming in the scope, we would also like to compare the spawning time of different coral genus between Taiwan and Japan (Figure 2). 
+
+<style>
+.html-widget {
+    margin: auto;
+}
+</style>
+```{r, warning=F, echo=F, message=F, fig.align="center", fig.cap="**Figure 2**: Map of coral spawning sites observed in Taiwan and Japan."}
+# Figure 2: Map of coral spawning sites observed in Taiwan and Japan. 
+
+# Select the countries needed (Taiwan & Japan)
+# Only selected the genus observed in both countries - See Methods section. 
+spawning.jptw <- raw.data %>% 
+  filter(Country %in% c('Japan', 'Taiwan')) %>%
+  filter(Genus %in% c('Galaxea', 'Lobophyllia', 'Coelastrea', 'Dipsastraea', 'Favites', 'Goniastrea', 'Platygyra', 'Porites'))
+
+# Delete the unneeded columns
+spawning.jptw[ , c('Subsite', 'O_n', 'Depth_m', 'N', 'No_start', 'Quality_start', 'No_end', 'Quality_end', 'Gamete_release', 'Situation', 'Timezone', 'Reference', 'Comments')] <- list(NULL)
+spawning.jptw$color <- ifelse(spawning.jptw$Country == "Japan", "#F8766D", "#00BFC4")
+
+# Mapping
+leaflet() %>%
+  addTiles() %>%
+  setView(lng = 123, lat = 27, zoom = 4.5) %>% # Center the map on Taiwan
+  addCircleMarkers(
+    lng = spawning.jptw$Longitude,
+    lat = spawning.jptw$Latitude,
+    popup = spawning.jptw$Site,
+    radius = 5,
+    fillColor = spawning.jptw$color,
+    fillOpacity = 1,
+    stroke = F)
+```
+
+### Methods
+#### Spawning time and geolocation
+We downloaded the Indo-Pacific coral spawning database (Baird et al. 2021) from nature.com/sdata/. Using the `max` and `summary` functions, it is determined that the year 2016 has the most data entry. Using the `ggplot2` package, we plot the spawning data (date and location) from 2016. The number of observation entries is considered as the size of dots. 
+
+```{r, warning=F}
+split <- raw.data %>%
+  separate(Date, into = c("day", "month", "year"), sep = "/")
+summary(as.factor(split$year))
+max(summary(as.factor(split$year))) # determine most data year 
+```
+
+##### Spawning data from Taiwan and Japan
+Using the `filter` function, we selected the genus that have spawning data in both Taiwan and Japan. We then made a boxplot to compare their *date of spawning relative to nearest full moon (DoSRtNFM).   
+
+Normality of the data is checked using Shapiro-Wilk, histogram, and normal Q-Q plot. Wilcoxon test is used for checking whether the differences of medians are significant.   
+```{r}
+# Select the countries needed (Taiwan & Japan)
+spawning.jptw <- raw.data %>% 
+  filter(Country %in% c('Japan', 'Taiwan')) %>%
+  filter(Genus %in% c('Galaxea', 'Lobophyllia', 'Coelastrea', 'Dipsastraea', 'Favites', 'Goniastrea', 'Platygyra', 'Porites'))
+
+# Delete the unneeded columns
+spawning.jptw[ , c('Subsite', 'O_n', 'Depth_m', 'N', 'No_start', 'Quality_start', 'No_end', 'Quality_end', 'Gamete_release', 'Situation', 'Timezone', 'Reference', 'Comments')] <- list(NULL)
+spawning.jptw$color <- ifelse(spawning.jptw$Country == "Japan", "#F8766D", "#00BFC4")
+```
+
+### Results
+#### Spawning time and geolocation
+In the year 2016, the dataset includes 13 sites from 10 countries. The figure is organized according to the latitudes where the equator is situated between Raffles Lighthouse and Moorea. For the North Hemisphere, spawning time was observed from March-September (Spring-Summer), while the South Hemisphere spawning time was observed from February-April and October-December (also their warm seasons).   
+
+Sites in Taiwan (Lyudao and NE coast) show clear trends in spawning time, where in Lyudao occurred earlier in the season compared to NE sites (Longdong & Bitoujiao). 
+
+In this dataset, Taiwan has the most recorded data. This is represented by the largest dots on the figure. 
+```{r, warning=F, echo=F, message=F, fig.align='center', fig.cap="**Figure 3**: Spawning data documented in 2016 worldwide. Sites on y-axis are ordered according to latitudes. Colours of sites are groupped as different countries. The point size represents the number of sample counts."}
+split.data <- raw.data %>%
+  separate(Date, into = c("day", "month", "year"), sep = "/") %>% 
+  filter(year == 2016) %>%
+  mutate(
+    date.x = as.Date(paste(year, month, day, sep = "-"), "%Y-%m-%d"),
+    site.y = fct_reorder(Site, Latitude, .desc = FALSE)) %>% 
+  group_by(date.x, site.y, Country) %>%  
+  summarise(Count = n())
+
+split.data2 <- split.data %>%
+  left_join(
+    raw.data %>%
+      dplyr::select(Site, Latitude, Longitude) %>%
+      distinct(), by = c("site.y" = "Site"))
+
+i.want.set3 <- brewer.pal(length(unique(split.data$Country)), "Set3")
+
+ggplot(split.data, aes(x =date.x, y = site.y, size = Count, color = Country)) +
+  geom_point(alpha = 0.4) +  
+  scale_size_continuous(name = "Count", range = c(2, 8)) +  # 調整點大小
+  scale_color_manual(values = i.want.set3) +  
+  scale_x_date(date_labels = "%m/%d", date_breaks = "1 month") +
+  labs(
+    title = "Coral Spawning Observed in 2016",
+    x = "Month",
+    y = "Site",
+    color = "Country") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust=0.5),
+        scale_fill_discrete(name = "Country")) +
+  guides(color = guide_legend(override.aes = list(size = 3, alpha = 1)))
+
+split.data2$Country <- factor(split.data2$Country)
+```
+***
+#### Spawning data from Taiwan and Japan
+```{r, warning=F, echo=F, message=F, fig.align='center', fig.cap="**Figure 4**: Compairson of different genus spawning time according to *date of spawning relative to nearest full moon (DoSRtNFM) between Taiwan and Japan. 0 represents the day of full moon, positive values represent days after FM, and negative values represent days before FM."}
+genus.tj.day <- ggplot(data = spawning.jptw, aes(x = Genus, y = DoSRtNFM, color = Country)) + 
+  geom_boxplot() + 
+  ggtitle("Spawning Time Comparison") + 
+  ylab("DoSRtNFM*") + 
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    plot.subtitle = element_text(size=12))
+genus.tj.day
+```
+The spawning time of the genus *Coelastrea* and *Dipsastraea* in Japan is significantly earlier than Taiwan, while spawning time of the rest of the genus have no significant differences. Results were determined according to the statistical tests presented below. 
+
+##### Statistical tests 
+```{r, warning=F}
+#check normality----
+shapiro.test(spawning.jptw$DoSRtNFM)
+par(mfrow = c(1, 2))
+hist(spawning.jptw$DoSRtNFM, main = 'Histogram of DoSRtNFM', xlab = "DoSRtNFM" )
+qqnorm(spawning.jptw$DoSRtNFM, main = 'Normal')
+qqline(spawning.jptw$DoSRtNFM)
+```
+```{r}
+#check data number----
+J.genus <- spawning.jptw %>% 
+          filter(Country == "Japan") %>% 
+          dplyr::select(Genus)
+summary(as.factor(J.genus$Genus))
+T.genus <- spawning.jptw %>% 
+  filter(Country == "Taiwan") %>% 
+  dplyr::select(Genus)
+summary(as.factor(T.genus$Genus))
+```
+Sample size of *Lobophyllia* is too small, so there's no comparison below  
+  
+H0: No differences in spawning time observed in Taiwan and Japan.   
+H1: Differences in spawning time observed in Taiwan and Japan. 
+```{r, warning=F}
+#wilcoxon----
+Coelastrea <- spawning.jptw %>%
+  filter(Genus %in% "Coelastrea",
+         Country %in% c("Japan", "Taiwan"))
+wilcox.test(DoSRtNFM ~ Country, data = Coelastrea, conf.int = TRUE, conf.level = 0.9)
+
+Dipsastraea <- spawning.jptw %>%
+  filter(Genus %in% "Dipsastraea",
+         Country %in% c("Taiwan", "Japan"))
+wilcox.test(DoSRtNFM ~ Country, data = Dipsastraea, conf.int = TRUE, conf.level = 0.9)
+
+Favites <- spawning.jptw %>%
+  filter(Genus %in% "Favites",
+         Country %in% c("Taiwan", "Japan"))
+wilcox.test(DoSRtNFM ~ Country, data = Favites, conf.int = TRUE, conf.level = 0.9)
+
+Galaxea <- spawning.jptw %>%
+  filter(Genus %in% "Galaxea",
+         Country %in% c("Taiwan", "Japan"))
+wilcox.test(DoSRtNFM ~ Country, data = Galaxea, conf.int = TRUE, conf.level = 0.9)
+
+Goniastrea <- spawning.jptw %>%
+  filter(Genus %in% "Goniastrea",
+         Country %in% c("Taiwan", "Japan"))
+wilcox.test(DoSRtNFM ~ Country, data = Goniastrea, conf.int = TRUE, conf.level = 0.9)
+
+Platygyra <- spawning.jptw %>%
+  filter(Genus %in% "Platygyra",
+         Country %in% c("Taiwan", "Japan"))
+wilcox.test(DoSRtNFM ~ Country, data = Platygyra, conf.int = TRUE, conf.level = 0.9)
+
+Porites <- spawning.jptw %>%
+  filter(Genus %in% "Porites",
+         Country %in% c("Taiwan", "Japan"))
+wilcox.test(DoSRtNFM ~ Country, data = Porites, conf.int = TRUE, conf.level = 0.9)
+```
+
+### Discussion
+- This long-term dataset includes records since the year 1978. In order to present the data from a singular year, we chose the year that has the most data, which was 2016.
+- However, the spawning seasonal trends in 2016 might not be fully representative of the entire dataset, as there might be other environmental influences on this particular year. 
+- If the conclusions were made based on the entire dataset, climate change observations could potentially be drawn from the coral spawning time patterns. 
+- Since the data recorded were not distributed evenly worldwide, our conclusions may be skewed.
+- Taiwan has an outstanding number of recorded coral spawning data, so if we look at the finer geological resolution comparing the sites in Taiwan, we might be able to make a clearer conclusion of the effect of latitude on spawning time. 
+
+- For Figure 4, we compared the spawning data from Taiwan and Japan. Since the coral gametes maturity can be effected by environmental factors like temperature (Lin et al. 2021), we hypothesized that due to the latitudinal differences, corals in Taiwan should spawn before corals in Japan. 
+- However, our conclusions demonstrated that the genus *Coelastrea* and *Dipsastraea* actually spawned earlier in Japan comparing to Taiwan. 
+  + Firstly, the data recorded in Japan were mostly from Okinawa, which has a relatively similar eco-region than in Taiwan. 
+  + Secondly, the field observation of coral spawning is difficult and labour-intensive. Most spawning might happen without being recorded. 
+  + Thirdly, we only looked at the scope of genus level. If we zoom closer to compare the sample species at two locations, there might be a clearer trends of spawning time differences. 
+
+
+### References 
+Baird AH, Guest JR, Edwards AJ, Bauman AG, Bouwmeester J, Mera H, Abrego D, Alvarez-Noriega M, Babcock RC, Barbosa MB, et al. 2021. An Indo-Pacific coral spawning database. Sci Data. 8(1):35. doi:10.1038/s41597-020-00793-8.  
+
+Lin C-H, Takahashi S, Mulla AJ, Nozawa Y. 2021. Moonrise timing is key for synchronized spawning in coral Dipsastraea speciosa. Proc Natl Acad Sci USA. 118(34):e2101985118. doi:10.1073/pnas.2101985118.
