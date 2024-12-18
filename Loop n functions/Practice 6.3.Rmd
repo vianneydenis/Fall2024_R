@@ -1,0 +1,58 @@
+---
+title: "Practice 6.3"
+author: "River Sung"
+date: "2024-11-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+**`r knitr::asis_output("\U26A0")` Practice 6.3** When having two species using the same resources but with different rates of efficiency), we can model their population growth using two linked equations:
+$$N1_{t+1}= N1_{t}+\left[growth.rate*N1_{t}*\left(\frac{K1-N1_{t}-\alpha_{12}N2_{t}}{K1}\right)\right]$$
+$$N2_{t+1}= N2_{t}+\left[growth.rate*N2_{t}*\left(\frac{K2-N2_{t}-\alpha_{21}N1_{t}}{K2}\right)\right]$$
+Those equations are known as the _Lotka-Volterra_ equations where _K_ values are the carrying capacities for each of the two species, both $\alpha$ values are competition coefficients that translate the effect of one species on another. Do not worry about this for now, try a range of 0.5 to 1.5, which would indicate that species are fairly similar competitors.
+I wrote the script, approaching the solution but damn... still not working! Help me to fix the following codes - this time you can look at it! See if you can debug this code that should grow each species alone (no competition), then put the two species interacting. Compare the results of 3 different plot. Note It would be easier if you first focus your attention on the functions of two species competing. Make an animation that makes sense will further be amazing. Send me as usual (in red = to be sent, see 1st class).
+</p>
+
+```{r}
+# I spent lots of time at the beginning really confused because I thought the two variables should be a12 and a21. Turns out they are variables indicating whether to run N1 line or N2 line
+grow<-function(start_1, start_2){
+  num_gen <- 30
+  generation <- 1:num_gen
+  N1 <- rep(0, num_gen) # changed here to match num_gen
+  N2 <- rep(0, num_gen)
+  growth.rate <- 1.2 
+  K1 <- 100
+  K2 <- 120
+  a12 <- 0.8
+  a21 <- 0.8
+  N1[1] <- start_1 # changed here to fit with the given variable
+  N2[1] <- start_2
+  for (t in 1:(num_gen-1)) {
+    N1[t+1] = N1[t] + growth.rate * N1[t] * (K1 - N1[t] - a12 * N2[t]) / K1
+    N2[t+1] = N2[t] + growth.rate * N2[t] * (K2 - N2[t] - a21 * N1[t]) / K2
+  }
+if (N1[1]>0){
+  plot(N1~generation, typ = "b", ylim = c(0,max(c(K1,K2))), ylab = "N") 
+  # if start_1 is >0 (1 in this case), plot Species 1 black line
+}  else {
+  plot(N1~generation, typ = "n", ylim = c(0,max(c(K1,K2))), ylab = "N") 
+  # or else (0 in this case), plot an empty plot 
+}
+if (N2[1]>0){
+  lines(N2~generation, typ = "b", col = 2)} 
+  # if start_2 is >0 (1 in this case), plot Species 2 red line
+}
+
+par(mar = c(4, 4, 2, 1), mfrow = c(3, 1), las = 1) # changed margin size 
+
+  grow(1,0)
+  text(4,110,"Species 1 alone")
+  
+  grow(0,1)
+  text(4,110,"Species 2 alone")
+  
+  grow(1,1) # changed both starting populations to 1 so the competition is even (I think?)
+  text(6,110,"Both Species competing")
+```

@@ -1,0 +1,74 @@
+---
+title: "Practice 5.1"
+author: "River Sung"
+date: "03/11/2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Instructions
+⚠ Practice 5.1 Using the rgbif package download data from any species you like. Make a nice map of the distribution of the selected species. Of course you will fix projection problem when plotting you map. You map can be static or interactive. This homework must be prepared in .Rmd format, which you will knit as a .html file. You will push your files in a public repository accessible via your Github account. 
+
+## Loading packages
+```{r, warning=FALSE, message=FALSE}
+# install.packages("sp")
+# install.packages("rgbif")
+# install.packages("leaflet")
+library(terra)
+library(rgbif)
+library(sp)
+library(leaflet)
+```
+
+## Static map 
+I would like to make a map of the distribution of an endemic frog species of Taiwan: Moltrecht’s Tree Frog (*Kurixalus idiootocus*)   
+莫氏樹蛙 - 台灣特有種  
+![Moltrecht’s Tree Frog (*Kurixalus idiootocus*)](/Users/riversung/NTU/113-1 Fall 2024/Ocean5098 R/Rclass_Fall2024/data/original.jpg){width="50%"} 
+
+```{r}
+# getting the data
+species_data <- occ_search(scientificName = "Kurixalus idiootocus", limit = 500)
+occurrences <- species_data$data
+coordinates <- occurrences[, c("decimalLongitude", "decimalLatitude")]
+species_points <- vect(coordinates, geom = c("decimalLongitude", "decimalLatitude"), crs = "EPSG:4326")
+
+# base map 
+taiwan <- vect('data/gadm/gadm41_TWN_1_pk.rds')
+plot(taiwan, 
+     col = "lightgray", 
+     xlim = c(119,123), ylim = c(21,26),
+     main = "Distribution of Moltrecht’s Tree Frog")
+# species distribution
+points(species_points, 
+     col = "purple", 
+     cex = 0.5,
+     pch = 20) 
+```
+
+
+## Leaflet map 
+```{r, results='hide'}
+# leaflet map
+leaflet() %>%
+  addTiles() %>%
+  setView(lng = 121.0, lat = 23.5, zoom = 7) # Center the map on Taiwan
+```
+```{r}
+# adding data points for Moltrecht’s Tree Frog
+leaflet() %>%
+  addTiles() %>%
+  setView(lng = 121.0, lat = 23.5, zoom = 7) %>%
+  addCircleMarkers(data = occurrences,
+                   lng = ~decimalLongitude, 
+                   lat = ~decimalLatitude,
+                   color = "purple",
+                   radius = 3,
+                   stroke = FALSE, 
+                   fillOpacity = 0.5,
+                   popup = ~paste("Longitude: ", decimalLongitude, "<br>", 
+                                  "Latitude: ", decimalLatitude))
+```
+

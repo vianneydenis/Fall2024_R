@@ -1,0 +1,81 @@
+---
+title: "Practice 4.2"
+author: "River Sung"
+date: "25/10/2024"
+output: html_document
+---
+**`r knitr::asis_output("\U26A0")` Practice 4.2** Using the `rairuoho` dataset you will use a `ggplot2` visualization to show that **_over the course of the experiment_** the growth of the grass is becoming higher in the **nutrient** treatment than in the **water** treatment. You are free to use the visualization that you think makes the most sense Do not forget to embellish your visualization and the use of a legend. You will send me a **pdf** file of the plot your made. You can also add your code into a *.Rmd* in which you will import your image and knit it in a *.html* file.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### Load packages
+```{r, echo = T, message = F}
+library(tidyverse)
+library(viridis)
+```
+
+### Taking manipulated data from Practice 2.3
+```{r, echo = T, message = F, results = "hide"}
+rairuoho <- read.table('https://www.dipintothereef.com/uploads/3/7/3/5/37359245/rairuoho.txt', header = T, sep = "\t") 
+head(rairuoho)
+
+rairuoho_long <- rairuoho %>%
+  pivot_longer(day3:day8, names_to = "Day", values_to = "Length")
+
+rairuoho_long$position <- paste(rairuoho_long$spatial1, rairuoho_long$spatial2, sep = "_")
+rairuoho_long
+
+rairuoho_long$row <- NULL
+rairuoho_long$column <- NULL
+rairuoho_long$spatial1 <- NULL
+rairuoho_long$spatial2 <- NULL
+
+print(rairuoho_long)
+
+rairuoho_long$Day <- gsub("day", "", rairuoho_long$Day)
+```
+```{r}
+str(rairuoho_long)
+```
+
+### Plotting the figure
+```{r}
+plot <- ggplot(rairuoho_long, 
+       aes(x = Day, 
+           y = Length,
+           fill = treatment,
+           color = treatment)) +
+  
+  geom_boxplot() +
+  
+  scale_fill_manual(values = c("nutrient" = "#c4bd8b", "water" = "#8faab3")) +
+  scale_color_manual(values = c("nutrient" = "#948c56", "water" = "#68919e")) +
+  
+  geom_jitter(color = "grey", size = 0.1, alpha = 1) +
+  labs(title = "Growth patterns of plants enriched with nutrient vs. water",
+       x = "Day",
+       y = "Length (cm)") +
+  
+  theme(panel.background = element_rect(fill = "#f2f0eb",
+                                        colour = "grey",
+                                        linewidth = 0.3),
+        plot.background = element_rect(fill = "white"),
+        plot.title = element_text(hjust = 0.5),
+        legend.position = c(0.85, 0.2),
+        legend.background = element_rect(fill = "#f2f0eb", 
+                                         linewidth = 0.3, 
+                                         linetype = "solid",
+                                         colour ="grey"))
+```
+### Final Plot
+```{r, echo = F, fig.align = 'center'}
+plot
+```
+
+### Saving
+```{r}
+setwd("/Users/riversung/NTU/113-1 Fall 2024/Ocean5098 R/Rclass_Fall2024/Graphics")
+ggsave(plot, filename = "Practice 4.2.pdf")
+```
+
